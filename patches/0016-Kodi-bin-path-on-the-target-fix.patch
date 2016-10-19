@@ -1,0 +1,33 @@
+diff --git a/tools/Linux/kodi-standalone.sh.in b/tools/Linux/kodi-standalone.sh.in
+index 4be11e1..61d330a 100644
+--- a/tools/Linux/kodi-standalone.sh.in
++++ b/tools/Linux/kodi-standalone.sh.in
+@@ -19,8 +19,8 @@
+ #  http://www.gnu.org/copyleft/gpl.html
+ 
+ APP=@APP_NAME@
+-prefix="@prefix@"
+-exec_prefix="@exec_prefix@"
++prefix="/usr/local"
++exec_prefix="/usr/local"
+ bindir="@bindir@"
+ bin_name=@APP_NAME_LC@
+ APP="${bindir}/${bin_name} --standalone $@"
+diff --git a/tools/Linux/kodi.sh.in b/tools/Linux/kodi.sh.in
+index 9e25f45..4e4497b 100644
+--- a/tools/Linux/kodi.sh.in
++++ b/tools/Linux/kodi.sh.in
+@@ -21,10 +21,10 @@
+ APP=@APP_NAME@
+ bin_name=@APP_NAME_LC@
+ SAVED_ARGS="$@"
+-prefix="@prefix@"
+-exec_prefix="@exec_prefix@"
++prefix="/usr/local"
++exec_prefix="/usr/local"
+ datarootdir="@datarootdir@"
+-LIBDIR="@libdir@"
++LIBDIR="/usr/local/lib"
+ CRASHLOG_DIR=${CRASHLOG_DIR:-$HOME}
+ USERDATA_DIR="${HOME}/.${bin_name}"
+ 

@@ -1,0 +1,98 @@
+diff --git a/configure.ac b/configure.ac
+index 269f278..8245123 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -656,6 +656,27 @@ case $host in
+      use_wayland=no
+      USE_STATIC_FFMPEG=1
+      ;;
++  aarch64-unknown-linux-gnu)
++     cross_compiling="yes"
++     target_platform=target_linux
++     platform_cflags="-Os -fPIC -DPIC -D_DEBUG -D_REENTRANT -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 -I$CHROOT_PATH/usr/include -I$CHROOT_PATH/usr/include/aarch64-linux-gnu -I$CHROOT_PATH/usr/lib -I$CHROOT_PATH/usr/lib/aarch64-linux-gnu -I$CHROOT_PATH/lib -I$CHROOT_PATH/lib/aarch64-linux-gnu -I$KODI_BUILD_PATH/aarch64-linux-gnu/include -I$CHROOT_PATH/usr/lib/aarch64-linux-gnu/dbus-1.0/include -I$CHROOT_PATH/usr/include/freetype2"
++     platform_cxxflags="$platform_cflags"
++     platform_ldflags="-Wl,-rpath-link=$CHROOT_PATH/usr/lib/aarch64-linux-gnu:$CHROOT_PATH/usr/lib:$CHROOT_PATH/lib/aarch64-linux-gnu:$CHROOT_PATH/lib:$CHROOT_PATH/usr/lib/aarch64-linux-gnu/samba:${prefix}/x86_64-linux-gnu-native/lib -L$KODI_BUILD_PATH/x86_64-linux-gnu-native/lib -L$CHROOT_PATH/usr/lib/aarch64-linux-gnu -L$CHROOT_PATH/usr/lib -L$CHROOT_PATH/lib -L$CHROOT_PATH/lib/aarch64-linux-gnu"
++     platform_os="linux"
++     ARCH="aarch64"
++     use_arch="aarch64"
++     use_cpu=cortex-a53
++     use_joystick=no
++     use_neon=yes
++     use_gles=yes
++     use_gl=yes
++     use_wayland=no
++     USE_STATIC_FFMPEG=1
++     PYTHON_VERSION="2.7"
++     PYTHON_LDFLAGS="-L$CHROOT/usr/lib/aarch64-linux-gnu -lpython2.7"
++     PYTHON_CPPFLAGS="-I$CHROOT/usr/include/python2.7"
++     PYTHON_NOVERSIONCHECK="no-check"
++     ;;
+   arm*-*linux-android*)
+      target_platform=target_android
+      use_arch="arm"
+diff --git a/tools/depends/build-aux/config.guess b/tools/depends/build-aux/config.guess
+index 49ba16f..ba11611 100644
+--- a/tools/depends/build-aux/config.guess
++++ b/tools/depends/build-aux/config.guess
+@@ -863,6 +863,13 @@ EOF
+     i*86:Minix:*:*)
+ 	echo ${UNAME_MACHINE}-pc-minix
+ 	exit ;;
++    aarch64:Linux:*:*)
++        echo ${UNAME_MACHINE}-unknown-linux-gnu
++        exit ;;
++    aarch64_be:Linux:*:*)
++        UNAME_MACHINE=aarch64_be
++        echo ${UNAME_MACHINE}-unknown-linux-gnu
++        exit ;;
+     alpha:Linux:*:*)
+ 	case `sed -n '/^cpu model/s/^.*: \(.*\)/\1/p' < /proc/cpuinfo` in
+ 	  EV5)   UNAME_MACHINE=alphaev5 ;;
+diff --git a/tools/depends/build-aux/config.sub b/tools/depends/build-aux/config.sub
+index d6b6b3c..a5611f8 100644
+--- a/tools/depends/build-aux/config.sub
++++ b/tools/depends/build-aux/config.sub
+@@ -247,6 +247,7 @@ case $basic_machine in
+ 	# Some are omitted here because they have special meanings below.
+ 	1750a | 580 \
+ 	| a29k \
++        | aarch64 | aarch64_be \
+ 	| alpha | alphaev[4-8] | alphaev56 | alphaev6[78] | alphapca5[67] \
+ 	| alpha64 | alpha64ev[4-8] | alpha64ev56 | alpha64ev6[78] | alpha64pca5[67] \
+ 	| am33_2.0 \
+@@ -355,6 +356,7 @@ case $basic_machine in
+ 	# Recognize the basic CPU types with company name.
+ 	580-* \
+ 	| a29k-* \
++        | aarch64-* | aarch64_be-* \
+ 	| alpha-* | alphaev[4-8]-* | alphaev56-* | alphaev6[78]-* \
+ 	| alpha64-* | alpha64ev[4-8]-* | alpha64ev56-* | alpha64ev6[78]-* \
+ 	| alphapca5[67]-* | alpha64pca5[67]-* | arc-* \
+diff --git a/tools/depends/configure.ac b/tools/depends/configure.ac
+index 12935e3..d7a0b2b 100644
+--- a/tools/depends/configure.ac
++++ b/tools/depends/configure.ac
+@@ -158,6 +158,23 @@ case $host in
+       platform_os="linux"
+     fi
+   ;;
++  aarch64-unknown-linux-gnu)
++    cross_compiling="yes"
++    target_platform=target_linux
++    platform_cflags="-Os -fPIC -DPIC -D_DEBUG -D_REENTRANT -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 -I$KODI_BUILD_PATH/aarch64-linux-gnu/include"
++    platform_ldflags="-Wl,-rpath-link=$CHROOT_PATH/usr/lib/aarch64-linux-gnu:$CHROOT_PATH/usr/lib:$CHROOT_PATH/lib/aarch64-linux-gnu:$CHROOT_PATH/lib:$CHROOT_PATH/usr/lib/aarch64-linux-gnu/samba:${prefix}/x86_64-linux-gnu-native/lib -L$KODI_BUILD_PATH/x86_64-linux-gnu-native/lib -L$KODI_BUILD_PATH/aarch64-linux-gnu/lib"
++    platform_cxxflags="$platform_cflags"
++    platform_os="linux"
++    ARCH="aarch64"
++    use_arch="aarch64"
++    use_cpu=cortex-a53
++    use_joystick=no
++    use_neon=yes
++    use_gles=yes
++    use_gl=yes
++    use_wayland=no
++    USE_STATIC_FFMPEG=1
++  ;;
+   *i686*-linux-gnu*|i*86*-*-linux-uclibc*)
+     use_cpu=$host_cpu
+     use_toolchain="${use_toolchain:-/usr}"

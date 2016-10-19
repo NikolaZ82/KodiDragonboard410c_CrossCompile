@@ -1,0 +1,12 @@
+diff --git a/tools/depends/native/automake-native/Makefile b/tools/depends/native/automake-native/Makefile
+index eaf7517..3f7f171 100644
+--- a/tools/depends/native/automake-native/Makefile
++++ b/tools/depends/native/automake-native/Makefile
+@@ -27,6 +27,7 @@ $(PLATFORM): $(TARBALLS_LOCATION)/$(ARCHIVE) $(DEPS)
+ 
+ $(LIBDYLIB): $(PLATFORM)
+ 	$(MAKE) -C $(PLATFORM)
++	cp ../../build-aux/config.guess ../../build-aux/config.sub $(PLATFORM)/lib
+ 
+ .installed-$(PLATFORM): $(LIBDYLIB)
+ 	$(MAKE) -C $(PLATFORM) install

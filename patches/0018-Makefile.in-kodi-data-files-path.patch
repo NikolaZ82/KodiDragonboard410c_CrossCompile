@@ -1,0 +1,29 @@
+diff --git a/Makefile.in b/Makefile.in
+index c858252..218700a 100644
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -529,6 +529,14 @@ ifeq ($(findstring bsd,@ARCH@), bsd)
+ 		-exec install -m 0644 "{}" $(DESTDIR)$(datarootdir)/@APP_NAME_LC@/"{}" \; \
+ 		-exec printf " -- %-75.75s\r" "{}" \;
+ else
++ifeq ($(findstring bsd,@ARCH@), bsd)
++	@find -E addons media userdata system -type f \
++		-not -iregex ".*-@ARCH@.*|.*\.vis|.*\.xbs|.*\.git.*|.*\.so|.*\.so\.[0-9].*|.*\.dll|$(subst ${space},|,$(INSTALL_FILTER))" \
++		-exec sh -c "install -d \"$(DESTDIR)$(libdir)/@APP_NAME_LC@/\`dirname '{}'\`\"" \; \
++		-and \
++		-exec install -m 0644 "{}" $(DESTDIR)$(libdir)/@APP_NAME_LC@/"{}" \; \
++		-exec printf " -- %-75.75s\r" "{}" \;
++else
+ ifeq ($(findstring Darwin,$(shell uname -s)),Darwin)
+ 	@find -E addons media userdata system -type f \
+ 		-not -iregex ".*-@ARCH@.*|.*\.vis|.*\.xbs|.*\.git.*|.*\.so|.*\.so\.[0-9].*|.*\.dll|$(subst ${space},|,$(INSTALL_FILTER))" \
+@@ -538,6 +546,9 @@ ifeq ($(findstring Darwin,$(shell uname -s)),Darwin)
+ 		-exec printf " -- %-75.75s\r" "{}" \;
+ else
+ 	@find addons media userdata system -regextype posix-extended -type f -not -iregex ".*-@ARCH@.*|.*\.vis|.*\.xbs|.*\.git.*|.*\.so|.*\.so\.[0-9].*|.*\.dll|$(subst ${space},|,$(INSTALL_FILTER))" -exec install -D -m 0644 "{}" $(DESTDIR)$(datarootdir)/@APP_NAME_LC@/"{}" \; -printf " -- %-75.75f\r"
++	@find addons media userdata system -regextype posix-extended -type f -not -iregex ".*-@ARCH@.*|.*\.vis|.*\.xbs|.*\.git.*|.*\.so|.*\.so\.[0-9].*|.*\.dll|$(subst ${space},|,$(INSTALL_FILTER))" -exec install -D -m 0644 "{}" $(DESTDIR)$(libdir)/@APP_NAME_LC@/"{}" \; -printf " -- %-75.75f\r"
++	@cd $(DESTDIR)$(libdir); [ -L xbmc ] || [ -d xbmc ] || ln -s @APP_NAME_LC@ xbmc
++endif
+ endif
+ endif
+ 	@# Icons and links

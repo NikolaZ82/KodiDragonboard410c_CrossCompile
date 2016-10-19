@@ -1,0 +1,14 @@
+diff --git a/codegenerator.mk b/codegenerator.mk
+index 2af2128..8716cbf 100644
+--- a/codegenerator.mk
++++ b/codegenerator.mk
+@@ -73,6 +72,9 @@ $(SWIG):
+ 	@false
+ 
+ $(GENERATED_JSON): $(JSON_BUILDER)
++	rm -fr tools/depends/native/JsonSchemaBuilder/bin
++	mkdir tools/depends/native/JsonSchemaBuilder/bin
++	cp tools/depends/native/JsonSchemaBuilder/x86_64-linux-native/JsonSchemaBuilder tools/depends/native/JsonSchemaBuilder/bin/
+ 	@echo Jsonbuilder: $(JSON_BUILDER)
+ 	$(MAKE) -C $(INTERFACES_DIR)/json-rpc $(notdir $@)
+ 
