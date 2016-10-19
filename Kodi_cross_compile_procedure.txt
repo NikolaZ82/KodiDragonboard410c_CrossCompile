@@ -178,7 +178,7 @@ mkdir toolchain
 cd toolchain
 wget http://releases.linaro.org/14.11/components/toolchain/binaries/aarch64-linux-gnu/gcc-linaro-4.9-2014.11-x86_64_aarch64-linux-gnu.tar.xz
 tar xJf gcc-linaro-4.9-2014.11-x86_64_aarch64-linux-gnu.tar.xz
-
+cd ../
 
 3. Modify ENV_VAR file according to the absolute path to your working directory
 --------------------------------------------------------------------------------------------------------------------------------------------------
@@ -195,6 +195,9 @@ for Kodi build, build Kodi for KodiDragonboard410c, and install it in the INSTAL
 --------------------------------------------------------------------------------------------------------------------------------------------------
 chmod +x kodi_build.sh
 ./kodi_build.sh
+
+NOTE !!!
+Each time you open new terminal, you need to execute source ENV_VAR if you are planing to start the build script from that terminal
 
 
 6. Copy the content of INSTALLATION folder to the /usr/local folder on target board
