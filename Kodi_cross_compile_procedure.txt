@@ -1,0 +1,200 @@
+                                                                            START
+*********************************************************************************************************************************************************************
+*********************************************************************************************************************************************************************
+
+1. Checkout cross compile utilities in your working directory
+--------------------------------------------------------------------------------------------------------------------------------------------------
+git clone https://github.com/NikolaZ82/KodiDragonboard410c_CrossCompile.git .
+
+
+
+                                                                CREATING CHROOT ENVIRONMENT
+*********************************************************************************************************************************************************************
+*********************************************************************************************************************************************************************
+
+
+1. Install necessary utils
+-------------------------------
+sudo apt-get update
+sudo apt-get upgrade
+sudo apt-get install qemu-user-static debootstrap git autoconf curl autopoint swig doxygen gawk cmake gperf python-dev build-essential libtool javacc
+
+Check if you have g++-4.9 version, if not add repository for g++-4.9, and install it
+    sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+    sudo apt-get update
+    sudo apt-get install g++-4.9
+
+Check if qemu-aarch64-static tool exists
+    ls -al  /usr/bin/qemu-aarch64-static
+If not, download qemu-aarch64-static debian package from page:
+http://packages.ubuntu.com/trusty-updates/amd64/qemu-user-static/download
+
+Install qemu-aarch64-static debian package
+    sudo dpkg -i qemu-user-static_2.0.0+dfsg-2ubuntu1.25_amd64.deb
+
+
+2. Prepare chroot destination folder  - /srv/chroot/jessie
+---------------------------------------------------------------------------------------------------------------
+sudo mkdir -p /srv/chroot/jessie/usr/bin 
+sudo cp /usr/bin/qemu-aarch64-static /srv/chroot/jessie/usr/bin/
+
+
+3. Create chroot
+---------------------------------------------------------------------------------------------------------------
+Check if jessie debootstrap script exists
+    ls -al /usr/share/debootstrap/scripts/jessie
+If not, create symboblic link to sid script
+    cd /usr/share/debootstrap/scripts
+    sudo ln -s sid jessie
+    cd
+
+Create chroot
+    sudo debootstrap  --arch=arm64 --no-check-gpg --exclude=debfoster jessie /srv/chroot/jessie http://ftp.debian.org/debian
+
+
+4. Make sure prc and sysf partition are mountet in chroot (since there is no actual OS installed in chroot)
+---------------------------------------------------------------------------------------------------------------
+Add these lines to /etc/fstab:
+    proc /srv/chroot/jessie/proc proc defaults 0 0
+    sysfs /srv/chroot/jessie/sys sysfs defaults 0 0
+
+
+    
+5. Mount proc and sysf partitions - only necessary once, after every reboot, it will be mounted automatically
+---------------------------------------------------------------------------------------------------------------
+sudo mount proc /srv/chroot/jessie/proc -t proc
+sudo mount sysfs /srv/chroot/jessie/sys -t sysfs
+
+
+6. Enter chroot
+---------------------------------------------------------------------------------------------------------------
+sudo LANG=C.UTF-8 chroot /srv/chroot/jessie /bin/bash
+
+
+7. Chroot settings
+---------------------------------------------------------------------------------------------------------------
+
+Set the time zone 
+dpkg-reconfigure tzdata
+
+Add jessie arm64 ports to /etc/apt/sources.list to install kernel in chroot:
+    deb http://ftp.debian.org/debian/ jessie main contrib non-free
+    deb http://ftp.debian.org/debian/ jessie-updates main contrib non-free
+    deb-src http://ftp.debian.org/debian/ jessie main contrib non-free
+    deb-src http://ftp.debian.org/debian/ jessie-updates main contrib non-free
+
+
+8. Install kernel image and dependencies for Kodi build inside chroot
+---------------------------------------------------------------------------------------------------------------
+apt-get update
+apt-get install linux-image-arm64 linux-headers-arm64
+apt-get install automake autopoint autotools-dev ccache cmake curl default-jre gawk gperf libao-dev libasound2-dev libass-dev libavahi-client-dev libavahi-common-dev libbluetooth-dev libbluray-dev libboost-dev libboost-thread-dev libbz2-dev libcap-dev libcdio-dev libcec-dev libcurl4-openssl-dev libcwiid-dev libdbus-1-dev libfontconfig1-dev libfreetype6-dev libfribidi-dev libgif-dev libgl1-mesa-dev libglu1-mesa-dev libiso9660-dev libjasper-dev libjpeg-dev libltdl-dev liblzo2-dev libmicrohttpd-dev libmodplug-dev libmpcdec-dev libmpeg2-4-dev libmysqlclient-dev libnfs-dev libogg-dev libpcre3-dev libplist-dev libpng12-dev libpulse-dev librtmp-dev libsdl1.2-dev libsmbclient-dev libsqlite3-dev libssh-dev libssl-dev libswscale-dev libtag1-dev libtiff5-dev libtinyxml-dev libtool libudev-dev libusb-dev libva-dev libvdpau-dev libvorbis-dev libxinerama-dev libxml2-dev libxmu-dev libxrandr-dev libxslt1-dev libxt-dev libyajl-dev lsb-release nasm python-dev python-imaging python-support swig unzip uuid-dev yasm zip zlib1g-dev libdvdread-dev groovy libhdhomerun-dev libegl1-mesa-dev libglew-dev libgles2-mesa-dev symlinks gcc-4.9 g++-4.9 javacc
+
+
+9. Change symbolic links absolute to relative paths
+---------------------------------------------------------------------------------------------------------------
+cd /
+symlinks -cr .
+
+
+10. Change pkgconfig paths in chroot to reflect complete chrooth path as a starting point (assuming your chroot path is /srv/chroot/jessie)
+---------------------------------------------------------------------------------------------------------------
+cd /usr/lib/pkgconfig
+sed -i -- 's/prefix\=\/usr/prefix\=\/srv\/chroot\/jessie\/usr/g' *.pc
+cd /usr/share/pkgconfig/  
+sed -i -- 's/prefix\=\/usr/prefix\=\/srv\/chroot\/jessie\/usr/g' *.pc
+cd /usr/lib/aarch64-linux-gnu/pkgconfig/
+sed -i -- 's/prefix\=\/usr/prefix\=\/srv\/chroot\/jessie\/usr/g' *.pc
+
+
+11. Remove absolute paths to libraries in GNU ld scripts libc.so and libpthread.so
+---------------------------------------------------------------------------------------------------------------
+Part of those scripts should look like this:
+
+/usr/lib/aarch64-linux-gnu/libc.so
+    GROUP ( libc.so.6 libc_nonshared.a  AS_NEEDED ( ld-linux-aarch64.so.1 ) )
+
+/usr/lib/aarch64-linux-gnu/libpthread.so
+    GROUP ( libpthread.so.0 libpthread_nonshared.a )
+    
+    
+12. Check if libavutil-dev is installed, and remove it if necessary, because ffmpeg is built as a dependency,
+so there is a need to avoid including headers other than specific ffmpeg version headers
+---------------------------------------------------------------------------------------------------------------
+ls -al /usr/include/libavutil
+
+if YES
+apt-get remove  libavutil-dev     
+    
+
+13. Exit chroot
+---------------------------------------------------------------------------------------------------------------
+exit
+
+
+
+
+
+
+                                                            PREPARE THE BOARD
+*********************************************************************************************************************************************************************
+*********************************************************************************************************************************************************************
+
+1. Download SD card installation Debian image for Dragonboard410c
+---------------------------------------------------------------------
+http://builds.96boards.org/releases/dragonboard410c/linaro/debian/latest/boot-linaro-jessie-qcom-snapdragon-arm64-20160630-110.img.gz
+
+2. Follow the instructions from this page - Flash the image from SD card to the board
+----------------------------------------------------------------------------------------
+https://github.com/96boards/documentation/blob/master/ConsumerEdition/DragonBoard-410c/Installation/LinuxSD.md
+
+Make sure that the SD card name /dev/XXX is used without appending partition to it (example /dev/mmcblk0 not mmcblk0p1)
+
+
+3. Install runtime dependencies
+------------------------------------------
+apt-get install libssh-4 libmicrohttpd10 libmysqlclient18 libtinyxml2.6.2 libyajl2 libpcrecpp0 libcdio13 libsmbclient
+
+4. Create necessary symbolic links
+------------------------------------------
+ln -fs /usr/lib/aarch64-linux-gnu/pulseaudio/libpulsecommon*.so /usr/lib/aarch64-linux-gnu/libpulsecommon-5.0.so
+
+
+
+
+
+
+                                                            START CROSS COMPILE KODI BUILD
+*********************************************************************************************************************************************************************
+*********************************************************************************************************************************************************************
+
+1. Position yourself in the working directory
+--------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+2. Download cross-compiler in tollchain directory
+--------------------------------------------------------------------------------------------------------------------------------------------------
+mkdir toolchain
+cd toolchain
+wget http://releases.linaro.org/14.11/components/toolchain/binaries/aarch64-linux-gnu/gcc-linaro-4.9-2014.11-x86_64_aarch64-linux-gnu.tar.xz
+tar xJf gcc-linaro-4.9-2014.11-x86_64_aarch64-linux-gnu.tar.xz
+
+
+3. Modify ENV_VAR file according to the absolute path to your working directory
+--------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+4. Source environment variables file
+--------------------------------------------------------------------------------------------------------------------------------------------------
+source ENV_VAR
+
+
+5. Start the build script
+The script will create source and build folder, checkout kodi source from git, copy and apply pathces, build native and target dependencies necessary 
+for Kodi build, build Kodi for KodiDragonboard410c, and install it in the INSTALLATION folder inside working directory
+--------------------------------------------------------------------------------------------------------------------------------------------------
+chmod +x kodi_build.sh
+./kodi_build.sh
+
+
+6. Copy the content of INSTALLATION folder to the /usr/local folder on target board

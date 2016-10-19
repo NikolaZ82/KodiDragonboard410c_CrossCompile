@@ -1,0 +1,15 @@
+export ARCH=arm64
+export CHROOT_PATH=/srv/chroot/jessie
+export KODI_PATH=/home/znikola/nikola/Kodi/work
+export KODI_BUILD_PATH=$KODI_PATH/build
+export KODI_SOURCE_PATH=$KODI_PATH/source
+export KODI_INSTALL_DIR=$KODI_PATH/INSTALLATION
+export KODI_TOOLCHAIN_PATH=$KODI_PATH/toolchain/gcc-linaro-4.9-2014.11-x86_64_aarch64-linux-gnu/bin
+export PATH="$KODI_TOOLCHAIN_PATH:$PATH"
+export LD_LIBRARY_PATH="$KODI_BUILD_PATH/x86_64-linux-gnu-native/lib"
+export LD_LIBRARY_PATH="$CHROOT_PATH/usr/lib:$LD_LIBRARY_PATH"
+export LD_LIBRARY_PATH="$CHROOT_PATH/usr/lib/aarch64-linux-gnu:$LD_LIBRARY_PATH"
+export LD_LIBRARY_PATH="$CHROOT_PATH/lib:$LD_LIBRARY_PATH"
+export LD_LIBRARY_PATH="$CHROOT_PATH/lib/aarch64-linux-gnu:$LD_LIBRARY_PATH"
+export LD_LIBRARY_PATH="$KODI_BUILD_PATH/x86_64-linux-gnu-native/lib:$LD_LIBRARY_PATH"
+
