@@ -142,7 +142,8 @@ exit
 
 1. Download SD card installation Debian image for Dragonboard410c
 ---------------------------------------------------------------------
-http://builds.96boards.org/releases/dragonboard410c/linaro/debian/latest/boot-linaro-jessie-qcom-snapdragon-arm64-20160630-110.img.gz
+http://builds.96boards.org/releases/dragonboard410c/linaro/debian/latest/
+Image name: boot-linaro-jessie-qcom-snapdragon-arm64-XXX.img.gz
 
 2. Follow the instructions from this page - Flash the image from SD card to the board
 ----------------------------------------------------------------------------------------
